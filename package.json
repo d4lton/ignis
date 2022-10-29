@@ -1,0 +1,19 @@
+{
+  "name": "ignis",
+  "version": "1.0.0",
+  "description": "Basic Firestore shell",
+  "main": "index.js",
+  "scripts": {
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@d4lton/utilities": "1.0.18",
+    "firebase-admin": "11.2.0",
+    "minimist": "1.2.7"
+  },
+  "devDependencies": {
+    "mkdirp": "1.0.4"
+  }
+}

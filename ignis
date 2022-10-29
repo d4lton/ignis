@@ -1,0 +1,9 @@
+#!env node
+
+const argv = require("minimist")(process.argv.slice(2));
+const Ignis = require("./src/Ignis");
+
+(async () => {
+  const ignis = new Ignis(argv);
+  await ignis.start();
+})();
