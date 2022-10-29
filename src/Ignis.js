@@ -21,9 +21,7 @@ class Ignis {
     const input = readline.createInterface({input: process.stdin, output: process.stdout});
 
     const firebaseConfig = this.config.get("firebase_config");
-    if (!firebaseConfig) {
-      console.log("Could not determine Firebase configuration, please set with the 'login' command.");
-    } else {
+    if (firebaseConfig) {
       this._firebase = new Firebase(this.config);
       this._firestore = new Firestore(this._firebase);
     }
@@ -60,6 +58,14 @@ class Ignis {
       input.prompt();
     });
 
+  }
+
+  isFirebaseInitialized() {
+    if (!this._firebase) {
+      console.log("Could not determine Firebase configuration, please set with the 'login' command.");
+      return false;
+    }
+    return true;
   }
 
   async handleHelpCommand(args) {
@@ -108,6 +114,7 @@ class Ignis {
 
   async handleCatCommand(args) {
     if (args._.length === 2) {
+      if (!this.isFirebaseInitialized()) { return; }
       const [collection, document] = args._[1].split("/");
       const data = await this._firestore.get(collection, document);
       if (args.out) {
@@ -122,6 +129,7 @@ class Ignis {
 
   async handleCpCommand(args) {
     if (args._.length === 3) {
+      if (!this.isFirebaseInitialized()) { return; }
       const [c1, d1] = args._[1].split("/");
       const [c2, d2] = args._[2].split("/");
       await this._firestore.copy(c1, d1, c2, d2, args.merge);
@@ -132,6 +140,7 @@ class Ignis {
 
   async handleLsCommand(args) {
     if (args._.length === 1 || args._.length === 2) {
+      if (!this.isFirebaseInitialized()) { return; }
       const data = await this._firestore.list(args._[1]);
       if (args.out) {
         fs.writeFileSync(args.out, JSON.stringify(data));

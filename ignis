@@ -6,8 +6,11 @@
 
 const argv = require("minimist")(process.argv.slice(2));
 const Ignis = require("./src/Ignis");
+const {Package} = require("@d4lton/utilities");
 
 (async () => {
+  const pkg = new Package();
+  console.log(`${pkg.name} v${pkg.version}`);
   const ignis = new Ignis(argv);
   await ignis.start();
 })();
