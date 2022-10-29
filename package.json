@@ -2,12 +2,13 @@
   "name": "ignis",
   "version": "1.0.0",
   "description": "Basic Firestore shell",
-  "main": "index.js",
+  "main": "ignis",
   "scripts": {
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Dana Basken <dbasken@gmail.com",
+  "repository": "https://github.com/d4lton/ignis",
+  "license": "MIT",
   "dependencies": {
     "@d4lton/utilities": "1.0.18",
     "firebase-admin": "11.2.0",
