@@ -17,6 +17,9 @@
   "devDependencies": {
     "mkdirp": "1.0.4"
   },
+  "bin": {
+    "ignis": "ignis"
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   }
