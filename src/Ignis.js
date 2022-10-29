@@ -46,8 +46,12 @@ class Ignis {
             case "ls":
               await this.handleLsCommand(args);
               break;
+            case "help":
+              await this.handleHelpCommand(args);
+              break;
             default:
               console.log(`unknown command: ${args._[0]}`);
+              await this.handleHelpCommand(args);
           }
         }
       } catch (error) {
@@ -56,6 +60,32 @@ class Ignis {
       input.prompt();
     });
 
+  }
+
+  async handleHelpCommand(args) {
+    console.log("");
+    console.log("Logging into Firebase:");
+    console.log("");
+    console.log("  > login [--file=<JSON filename>] [--env=<environment-variable>]");
+    console.log("");
+    console.log("    The specified filename should be a JSON file with the Firebase authentication.");
+    console.log("    The specified environment variable should point to the JSON file.");
+    console.log("    One of [file|env] must be specified");
+    console.log("");
+    console.log("Getting the contents of a document:");
+    console.log("");
+    console.log("  > cat <collection/document> [--out=<filename>]");
+    console.log("");
+    console.log("Copying one document to another:");
+    console.log("");
+    console.log("  > cp <collection/document> <collection/document> [--merge]");
+    console.log("");
+    console.log("Listing documents in a collection or top-level collections:");
+    console.log("");
+    console.log("  > ls [<collection>] [--out=<filename>]");
+    console.log("");
+    console.log("    If <collection> is omitted, top-level collections will be listed.");
+    console.log("");
   }
 
   async handleLoginCommand(args) {
