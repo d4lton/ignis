@@ -98,10 +98,9 @@ class Ignis {
     if (args.file) {
       if (fs.existsSync(args.file)) {
         const json = JSON.parse(fs.readFileSync(args.file).toString());
-        this.config.set("firebase_config", json, true, () => {
-          this._firebase = new Firebase(this.config);
-          this._firestore = new Firestore(this._firebase);
-        });
+        this.config.set("firebase_config", json);
+        this._firebase = new Firebase(this.config);
+        this._firestore = new Firestore(this._firebase);
       } else {
         console.log(`Could not find file ${args.file}.`);
       }
