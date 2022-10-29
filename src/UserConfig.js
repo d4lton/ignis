@@ -1,3 +1,7 @@
+/**
+ * Copyright ©2022 Dana Basken
+ */
+
 const os = require("node:os");
 const fs = require("node:fs");
 const path = require("node:path");

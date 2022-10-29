@@ -1,3 +1,7 @@
+/**
+ * Copyright ©2022 Dana Basken
+ */
+
 class Firestore {
 
   constructor(firebase) {

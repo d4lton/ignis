@@ -1,3 +1,7 @@
+/**
+ * Copyright ©2022 Dana Basken
+ */
+
 const admin = require("firebase-admin");
 
 class Firebase {

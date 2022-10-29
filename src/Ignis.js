@@ -1,3 +1,7 @@
+/**
+ * Copyright ©2022 Dana Basken
+ */
+
 const fs = require("node:fs");
 const readline = require("node:readline");
 const minimist = require("minimist");
@@ -11,13 +15,6 @@ class Ignis {
 
   constructor(argv) {
     this._argv = argv;
-  }
-
-  usage() {
-    console.log("");
-    console.log("usage: ignis <stuff>");
-    console.log("");
-    process.exit(1);
   }
 
   async start() {
