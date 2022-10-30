@@ -2,39 +2,36 @@
  * Copyright ©2022 Dana Basken
  */
 
+const FirestoreNode = require("./FirestoreNode");
+
 class Firestore {
 
   constructor(firebase) {
     this._firebase = firebase;
   }
 
-  async get(collection, document) {
-    const snapshot = await this._firebase.app.firestore().collection(collection).doc(document).get();
-    if (snapshot.exists) {
-      return snapshot.data();
-    }
+  async get(path) {
+    try {
+      const node = new FirestoreNode(path, this._firebase.app);
+      return node.get();
+    } catch (error) {}
   }
 
-  async put(collection, document, data, merge = false) {
-    await this._firebase.app.firestore().collection(collection).doc(document).set(data, {merge: merge});
+  async put(path, data, merge = false) {
+    const node = new FirestoreNode(path, this._firebase.app);
+    await node.put(data, merge);
   }
 
-  async copy(c1, d1, c2, d2, merge = false) {
-    const data = await this.get(c1, d1);
+  async copy(source, destination, merge = false) {
+    const data = await this.get(source);
     if (data) {
-      await this.put(c2, d2, data, merge);
+      await this.put(destination, data, merge);
     }
   }
 
-  async list(collection) {
-    let snapshot;
-    if (!collection) {
-      const collections = await this._firebase.app.firestore().listCollections();
-      return collections.map(it => it.id);
-    } else {
-      snapshot = await this._firebase.app.firestore().collection(collection).get();
-      return snapshot.docs.map(it => it.exists ? `${collection}/${it.id}` : undefined).filter(it => it);
-    }
+  async list(path) {
+    const node = new FirestoreNode(path, this._firebase.app);
+    return node.list();
   }
 
 }

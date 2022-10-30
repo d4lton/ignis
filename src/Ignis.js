@@ -9,6 +9,8 @@ const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
 const Firestore = require("./firebase/Firestore");
 const History = require("./History");
+const Util = require("util");
+const {Utilities} = require("@d4lton/utilities");
 
 class Ignis {
 
@@ -21,17 +23,20 @@ class Ignis {
     this._history = new History(this._config);
   }
 
-
   login() {
-    const firebaseConfig = this._config.get("firebase_config");
-    this._firebase = undefined;
-    this._firestore = undefined;
-    if (firebaseConfig) {
-      if (!this._firebases[this._project]) {
-        this._firebases[this._project] = new Firebase(this._config, this._project);
+    try {
+      const firebaseConfig = this._config.get("firebase_config");
+      this._firebase = undefined;
+      this._firestore = undefined;
+      if (firebaseConfig) {
+        if (!this._firebases[this._project]) {
+          this._firebases[this._project] = new Firebase(this._config, this._project);
+        }
+        this._firebase = this._firebases[this._project];
+        this._firestore = new Firestore(this._firebase);
       }
-      this._firebase = this._firebases[this._project];
-      this._firestore = new Firestore(this._firebase);
+    } catch (error) {
+      console.log(error.message);
     }
   }
 
@@ -41,13 +46,26 @@ class Ignis {
     input.prompt();
   }
 
-  async start() {
-    try {
-      this.login();
-    } catch (error) {
-      console.log(error.message);
+  async completer(line, callback) {
+    let completions = ["login", "cat", "cp", "ls", "project", "projects"];
+    let hits;
+    if (Utilities.isEmpty(line)) {
+      hits = completions;
+    } else {
+      hits = completions.filter(completion => completion.startsWith(line));
     }
-    const input = readline.createInterface({input: process.stdin, output: process.stdout, history: this._history.history});
+    callback(null, [hits, line]);
+  }
+
+  async start() {
+    this.login();
+    const input = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      completer: this.completer.bind(this),
+      history: this._history.history,
+      terminal: true
+    });
     this.prompt(input);
     input.on("line", async (line) => {
       this._history.add(line);
@@ -91,7 +109,6 @@ class Ignis {
       }
       this.prompt(input);
     });
-
   }
 
   isFirebaseInitialized() {
@@ -128,11 +145,11 @@ class Ignis {
     console.log("");
     console.log("Switch the current project:");
     console.log("");
-    console.log("  > usage: project [<project-id>]");
+    console.log("  > project [<project-id>]");
     console.log("");
     console.log("List projects:");
     console.log("");
-    console.log("  > usage: projects [--flush]");
+    console.log("  > projects [--flush]");
     console.log("");
   }
 
@@ -156,8 +173,7 @@ class Ignis {
   async handleCatCommand(args) {
     if (args._.length === 2) {
       if (!this.isFirebaseInitialized()) { return; }
-      const [collection, document] = args._[1].split("/");
-      const data = await this._firestore.get(collection, document);
+      const data = await this._firestore.get(args._[1]);
       if (args.out) {
         fs.writeFileSync(args.out, JSON.stringify(data));
       } else {
@@ -171,9 +187,7 @@ class Ignis {
   async handleCpCommand(args) {
     if (args._.length === 3) {
       if (!this.isFirebaseInitialized()) { return; }
-      const [c1, d1] = args._[1].split("/");
-      const [c2, d2] = args._[2].split("/");
-      await this._firestore.copy(c1, d1, c2, d2, args.merge);
+      await this._firestore.copy(args._[1], args._[2], args.merge);
     } else {
       console.log("usage: cp <collection/document> <collection/document> [--merge]")
     }
