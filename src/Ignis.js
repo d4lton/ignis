@@ -9,7 +9,6 @@ const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
 const Firestore = require("./firebase/Firestore");
 const History = require("./History");
-const Util = require("util");
 const {Utilities} = require("@d4lton/utilities");
 
 class Ignis {
@@ -23,17 +22,19 @@ class Ignis {
     this._history = new History(this._config);
   }
 
-  login() {
+  ensureLoggedIn(project) {
+    if (!this._firebases[project]) {
+      this.login(project);
+    }
+  }
+
+  login(project) {
     try {
       const firebaseConfig = this._config.get("firebase_config");
-      this._firebase = undefined;
-      this._firestore = undefined;
       if (firebaseConfig) {
-        if (!this._firebases[this._project]) {
-          this._firebases[this._project] = new Firebase(this._config, this._project);
+        if (!this._firebases[project]) {
+          this._firebases[project] = new Firebase(this._config, project);
         }
-        this._firebase = this._firebases[this._project];
-        this._firestore = new Firestore(this._firebase);
       }
     } catch (error) {
       console.log(error.message);
@@ -41,7 +42,7 @@ class Ignis {
   }
 
   prompt(input) {
-    const loginIndicator = this._firebase ? "*" : "";
+    const loginIndicator = this._firebases[this._project] ? "*" : "";
     input.setPrompt(`${this._project}${loginIndicator} > `);
     input.prompt();
   }
@@ -58,7 +59,7 @@ class Ignis {
   }
 
   async start() {
-    this.login();
+    this.login(this._project);
     const input = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -69,8 +70,12 @@ class Ignis {
     this.prompt(input);
     input.on("line", async (line) => {
       this._history.add(line);
-      const args = minimist(line.split(" "));
+
+      const match = line.match(/^(.+?)\s+>\s+(.+?)$/);
+      if (match) { line = `${match[1]} --out=${match[2]}`; }
+      const args = minimist(line.split(" "), {boolean: true});
       args._ = args._.filter(it => it);
+
       try {
         if (args._.length > 0) {
           switch (args._[0]) {
@@ -111,14 +116,6 @@ class Ignis {
     });
   }
 
-  isFirebaseInitialized() {
-    if (!this._firebase) {
-      console.log("Could not determine Firebase configuration, please set with the 'login' command.");
-      return false;
-    }
-    return true;
-  }
-
   async handleHelpCommand(args) {
     console.log("");
     console.log("Logging into Firebase for the current project:");
@@ -131,17 +128,15 @@ class Ignis {
     console.log("");
     console.log("Getting the contents of a document:");
     console.log("");
-    console.log("  > cat <collection/document> [--out=<filename>]");
+    console.log("  > cat <path> [--out=<filename>]");
     console.log("");
     console.log("Copying one document to another:");
     console.log("");
-    console.log("  > cp <collection/document> <collection/document> [--merge]");
+    console.log("  > cp <path> <path> [--merge]");
     console.log("");
     console.log("Listing documents in a collection or top-level collections:");
     console.log("");
-    console.log("  > ls [<collection>] [--out=<filename>]");
-    console.log("");
-    console.log("    If <collection> is omitted, top-level collections will be listed.");
+    console.log("  > ls <path> [--out=<filename>]");
     console.log("");
     console.log("Switch the current project:");
     console.log("");
@@ -159,44 +154,49 @@ class Ignis {
         const json = JSON.parse(fs.readFileSync(args.file).toString());
         if (args.project) { this._project = args.project; }
         this._config.set(`firebase_config.${this._project}`, json);
-        this.login();
+        this.login(this._project);
       } else {
         console.log(`Could not find file ${args.file}.`);
       }
     } else if (args.env) {
       console.log("Not yet implemented.");
     } else {
-      console.log("usage: login [--file=<JSON filename>] [--env=<environment-variable>]");
+      await this.handleHelpCommand(args);
     }
   }
 
   async handleCatCommand(args) {
     if (args._.length === 2) {
-      if (!this.isFirebaseInitialized()) { return; }
-      const data = await this._firestore.get(args._[1]);
+      const projectPathInfo = this.getProjectPathInfo(args._[1]);
+      const data = await projectPathInfo.firebase.firestore.get(projectPathInfo.path);
+      const text = args.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
       if (args.out) {
-        fs.writeFileSync(args.out, JSON.stringify(data));
+        fs.writeFileSync(args.out, text);
       } else {
-        console.log(JSON.stringify(data));
+        console.log(text);
       }
     } else {
-      console.log("usage: cat <collection/document> [--out=<filename>]")
+      await this.handleHelpCommand(args);
     }
   }
 
   async handleCpCommand(args) {
     if (args._.length === 3) {
-      if (!this.isFirebaseInitialized()) { return; }
-      await this._firestore.copy(args._[1], args._[2], args.merge);
+      const projectPathSourceInfo = this.getProjectPathInfo(args._[1]);
+      const projectPathDestinationInfo = this.getProjectPathInfo(args._[2]);
+      const data = await projectPathSourceInfo.firebase.firestore.get(projectPathSourceInfo.path);
+      if (data) {
+        await projectPathDestinationInfo.firebase.firestore.put(projectPathDestinationInfo.path, data, args.merge);
+      }
     } else {
-      console.log("usage: cp <collection/document> <collection/document> [--merge]")
+      await this.handleHelpCommand(args);
     }
   }
 
   async handleLsCommand(args) {
     if (args._.length === 1 || args._.length === 2) {
-      if (!this.isFirebaseInitialized()) { return; }
-      const data = await this._firestore.list(args._[1]);
+      const projectPathInfo = this.getProjectPathInfo(args._[1]);
+      const data = await projectPathInfo.firebase.firestore.list(projectPathInfo.path);
       if (args.out) {
         fs.writeFileSync(args.out, JSON.stringify(data));
       } else {
@@ -205,7 +205,7 @@ class Ignis {
         }
       }
     } else {
-      console.log("usage: ls <collection> [--out=<filename>]")
+      await this.handleHelpCommand(args);
     }
   }
 
@@ -215,9 +215,9 @@ class Ignis {
     } else if (args._.length === 2) {
       this._project = args._[1];
       this._config.set("project", this._project);
-      this.login();
+      this.login(this._project);
     } else {
-      console.log("usage: project [<project-id>] [--flush]")
+      await this.handleHelpCommand(args);
     }
   }
 
@@ -237,6 +237,22 @@ class Ignis {
     }
   }
 
+  getProjectPathInfo(path) {
+    path = path || "";
+    let project = this._project;
+    const match = path.match(/^(.+?):(.*)$/);
+    if (match) {
+      project = match[1];
+      path = match[2];
+    }
+    this.ensureLoggedIn(project);
+    const firebase = this._firebases[project];
+    if (!firebase) {
+      throw new Error(`No login found for project "${project}"`);
+    }
+    return {project: project, path: path, firebase: firebase};
+  }
+
   async flush() {
     this._config.set("firebase_config", {});
     for (const firebase of Object.values(this._firebases)) {
@@ -244,7 +260,6 @@ class Ignis {
     }
     this._firebases = {};
     console.log("All projects removed.");
-    this.login();
   }
 
 }

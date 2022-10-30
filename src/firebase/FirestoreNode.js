@@ -29,12 +29,16 @@ class FirestoreNode {
       if (snapshot?.exists) {
         return snapshot.data();
       }
+    } else {
+      throw new Error(`Cannot read data from a collection at path "${this._path}"`);
     }
   }
 
   async put(data, merge = false) {
     if (this._type === "document") {
       await this._ref.set(data, {merge: merge});
+    } else {
+      throw new Error(`Cannot store data in a collection at path "${this._path}"`);
     }
   }
 

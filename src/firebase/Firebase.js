@@ -3,6 +3,7 @@
  */
 
 const admin = require("firebase-admin");
+const Firestore = require("./Firestore");
 
 class Firebase {
 
@@ -14,10 +15,15 @@ class Firebase {
     const projectConfig = firebaseConfig[project];
     if (!projectConfig) { throw new Error(`No Firebase configuration found for project "${this._project}"`); }
     this._app = admin.initializeApp({credential: admin.credential.cert(projectConfig)}, this._project);
+    this._firestore = new Firestore(this);
   }
 
   get app() {
     return this._app;
+  }
+
+  get firestore() {
+    return this._firestore;
   }
 
 }
