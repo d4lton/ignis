@@ -13,7 +13,7 @@
   "repository": "https://github.com/d4lton/ignis",
   "license": "MIT",
   "dependencies": {
-    "@d4lton/utilities": "1.0.20",
+    "@d4lton/utilities": "1.0.21",
     "firebase-admin": "11.2.0",
     "minimist": "1.2.7"
   },
