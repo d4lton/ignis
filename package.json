@@ -1,6 +1,6 @@
 {
   "name": "@d4lton/ignis",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Basic Firestore shell",
   "main": "ignis",
   "scripts": {
