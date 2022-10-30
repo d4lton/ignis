@@ -8,6 +8,7 @@ const minimist = require("minimist");
 const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
 const Firestore = require("./firebase/Firestore");
+const History = require("./History");
 
 class Ignis {
 
@@ -17,6 +18,7 @@ class Ignis {
   constructor(argv) {
     this._argv = argv;
     this._project = this._argv.project || this._config.get("project") || "default";
+    this._history = new History(this._config);
   }
 
 
@@ -45,9 +47,10 @@ class Ignis {
     } catch (error) {
       console.log(error.message);
     }
-    const input = readline.createInterface({input: process.stdin, output: process.stdout});
+    const input = readline.createInterface({input: process.stdin, output: process.stdout, history: this._history.history});
     this.prompt(input);
     input.on("line", async (line) => {
+      this._history.add(line);
       const args = minimist(line.split(" "));
       args._ = args._.filter(it => it);
       try {
@@ -72,8 +75,12 @@ class Ignis {
               await this.handleProjectsCommand(args);
               break;
             case "help":
+            case "?":
               await this.handleHelpCommand(args);
               break;
+            case "quit":
+              process.exit(0);
+              return;
             default:
               console.log(`unknown command: ${args._[0]}`);
               await this.handleHelpCommand(args);
@@ -97,7 +104,7 @@ class Ignis {
 
   async handleHelpCommand(args) {
     console.log("");
-    console.log("Logging into Firebase:");
+    console.log("Logging into Firebase for the current project:");
     console.log("");
     console.log("  > login [--file=<JSON filename>] [--env=<environment-variable>]");
     console.log("");
@@ -118,6 +125,14 @@ class Ignis {
     console.log("  > ls [<collection>] [--out=<filename>]");
     console.log("");
     console.log("    If <collection> is omitted, top-level collections will be listed.");
+    console.log("");
+    console.log("Switch the current project:");
+    console.log("");
+    console.log("  > usage: project [<project-id>]");
+    console.log("");
+    console.log("List projects:");
+    console.log("");
+    console.log("  > usage: projects [--flush]");
     console.log("");
   }
 

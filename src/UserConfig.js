@@ -33,6 +33,10 @@ class UserConfig {
     fs.writeFileSync(this._configFile, JSON.stringify(this._entries));
   }
 
+  get path() {
+    return this._configPath;
+  }
+
 }
 
 module.exports = UserConfig;
