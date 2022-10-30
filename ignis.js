@@ -1,5 +1,3 @@
-#!env node
-
 /**
  * Copyright ©2022 Dana Basken
  */

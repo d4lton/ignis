@@ -21,7 +21,7 @@
     "mkdirp": "1.0.4"
   },
   "bin": {
-    "ignis": "ignis"
+    "ignis": "ignis.js"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
