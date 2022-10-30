@@ -32,7 +32,7 @@ The prompt will show you the current project, and you can switch to a new projec
 
 Before you can do any operations on a project, you will have to log in with the `login --file=<firebase-config-json>` file. This config will be cached under your `~/.config` directory, so you don't have to log in every time you use ignis.
 
-Any place you use a <path>, you can choose to specify a project ID. For example:
+Any place you use a `<path>`, you can choose to specify a project ID. For example:
 
     production > cp production:config/main staging:config/main
 
