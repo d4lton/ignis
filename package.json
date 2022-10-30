@@ -1,9 +1,13 @@
 {
   "name": "@d4lton/ignis",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Basic Firestore shell",
   "main": "ignis",
-  "scripts": {},
+  "scripts": {
+    "postversion": "git add package.json && git commit -m \"$npm_package_name $npm_package_version\" && git push && git tag -a $npm_package_version -m $npm_package_version && git push --tags",
+    "patch": "npm --no-git-tag-version version patch",
+    "release": "npm run patch && npm publish"
+  },
   "keywords": [],
   "author": "Dana Basken <dbasken@gmail.com",
   "repository": "https://github.com/d4lton/ignis",
