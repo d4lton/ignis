@@ -1,13 +1,21 @@
+const {ObjectUtilities} = require("@d4lton/utilities");
+
 class FirestoreNode {
 
   constructor(path, app) {
     this._app = app;
     const parts = path?.split("/")?.filter(it => it) || [];
     this._path = parts.join("/");
+    this._property = undefined;
     if (parts.length === 0) {
       this._type = "root";
     } else if (parts.length % 2 === 0) {
       this._type = "document";
+      const match = this._path.match(/^(.+?)\.(.+)$/);
+      if (match) {
+        this._path = match[1];
+        this._property = match[2];
+      }
       this._ref = this._app.firestore().doc(this._path);
     } else {
       this._type = "collection";
@@ -27,7 +35,12 @@ class FirestoreNode {
     if (this._type === "document") {
       const snapshot = await this._ref.get();
       if (snapshot?.exists) {
-        return snapshot.data();
+        const data = snapshot.data();
+        if (this._property) {
+          return ObjectUtilities.getDottedKeyValue(this._property, data);
+        } else {
+          return data;
+        }
       }
     } else {
       throw new Error(`Cannot read data from a collection at path "${this._path}"`);
@@ -36,7 +49,16 @@ class FirestoreNode {
 
   async put(data, merge = false) {
     if (this._type === "document") {
-      await this._ref.set(data, {merge: merge});
+      if (this._property) {
+        const snapshot = await this._ref.get();
+        if (snapshot.exists) {
+          const document = snapshot.data();
+          ObjectUtilities.setDottedKeyValue(this._property, data, document);
+          await this._ref.set(document, {merge: merge});
+        }
+      } else {
+        await this._ref.set(data, {merge: merge});
+      }
     } else {
       throw new Error(`Cannot store data in a collection at path "${this._path}"`);
     }

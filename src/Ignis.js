@@ -70,12 +70,8 @@ class Ignis {
     this.prompt(input);
     input.on("line", async (line) => {
       this._history.add(line);
-
-      const match = line.match(/^(.+?)\s+>\s+(.+?)$/);
-      if (match) { line = `${match[1]} --out=${match[2]}`; }
       const args = minimist(line.split(" "), {boolean: true});
       args._ = args._.filter(it => it);
-
       try {
         if (args._.length > 0) {
           switch (args._[0]) {
@@ -92,6 +88,7 @@ class Ignis {
               await this.handleLsCommand(args);
               break;
             case "project":
+            case "use":
               await this.handleProjectCommand(args);
               break;
             case "projects":
@@ -128,7 +125,7 @@ class Ignis {
     console.log("");
     console.log("Getting the contents of a document:");
     console.log("");
-    console.log("  > cat <path> [--out=<filename>]");
+    console.log("  > cat <path> [--out=<filename>]"); // TODO: fix docs
     console.log("");
     console.log("Copying one document to another:");
     console.log("");
@@ -165,18 +162,55 @@ class Ignis {
     }
   }
 
+  parseCatCommand(args) {
+    let result = {valid: false};
+    const line = args._.join(" ");
+    const match = line.match(/\s*cat\s+(.+)\s*>\s*(.+)\s*/);
+    if (match) {
+      const path1 = match[1].trim();
+      const path2 = match[2].trim();
+      const path1IsFile = fs.existsSync(path1);
+      const path2IsFile = fs.existsSync(path2);
+      if (path1IsFile && path2IsFile) { return result; }
+      result = {valid: true, transfer: true, source: {file: path1IsFile, path: path1}, destination: {file: path2IsFile, path: path2}};
+      if (!path1IsFile && !path2IsFile) { result.destination.file = true; }
+    } else {
+      const match = line.match(/\s*cat\s+(.+)\s*/)
+      if (match) {
+        const path = match[1];
+        const pathIsFile = fs.existsSync(path);
+        if (pathIsFile) {
+          result = {valid: true, transfer: false, source: {file: true, path: path}};
+        } else {
+          result = {valid: true, transfer: false, source: {file: false, path: path}};
+        }
+      }
+    }
+    return result;
+  }
+
   async handleCatCommand(args) {
-    if (args._.length === 2) {
-      const projectPathInfo = this.getProjectPathInfo(args._[1]);
-      const data = await projectPathInfo.firebase.firestore.get(projectPathInfo.path);
-      const text = args.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-      if (args.out) {
-        fs.writeFileSync(args.out, text);
+    const command = this.parseCatCommand(args);
+    if (!command.valid) { return this.handleHelpCommand(args); }
+    let data;
+    if (command.source.file) {
+      data = JSON.parse(fs.readFileSync(command.source.path).toString());
+    } else {
+      const projectPathInfo = this.getProjectPathInfo(command.source.path);
+      data = await projectPathInfo.firebase.firestore.get(projectPathInfo.path);
+    }
+    if (args.parse) { data = JSON.parse(data); }
+    data = args.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+    if (command.transfer) {
+      if (command.destination.file) {
+        fs.writeFileSync(command.destination.path, data);
       } else {
-        console.log(text);
+        const projectPathInfo = this.getProjectPathInfo(command.destination.path);
+        if (typeof data === "string") { data = JSON.parse(data); }
+        await projectPathInfo.firebase.firestore.put(projectPathInfo.path, data, args.merge);
       }
     } else {
-      await this.handleHelpCommand(args);
+      console.log(data);
     }
   }
 
@@ -197,7 +231,7 @@ class Ignis {
     if (args._.length === 1 || args._.length === 2) {
       const projectPathInfo = this.getProjectPathInfo(args._[1]);
       const data = await projectPathInfo.firebase.firestore.list(projectPathInfo.path);
-      if (args.out) {
+      if (args.out) { // TODO: use > like in cat
         fs.writeFileSync(args.out, JSON.stringify(data));
       } else {
         for (const path of data) {
