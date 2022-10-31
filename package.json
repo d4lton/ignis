@@ -6,7 +6,7 @@
   "scripts": {
     "postversion": "git add package.json && git commit -m \"$npm_package_name $npm_package_version\" && git push && git tag -a $npm_package_version -m $npm_package_version && git push --tags",
     "patch": "npm --no-git-tag-version version patch",
-    "release": "npm run patch && npm publish"
+    "release": "npm run patch && npm publish --access=public"
   },
   "keywords": [],
   "author": "Dana Basken <dbasken@gmail.com",
@@ -22,8 +22,5 @@
   },
   "bin": {
     "ignis": "ignis"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   }
 }
