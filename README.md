@@ -10,7 +10,7 @@ Ignis is a simple Firebase/Firestore command-line tool that allows you to list, 
 
 Start ignis, optionally selecting the default project:
 
- `./ignis [--project <project-id>]`
+ `ignis [--project <project-id>]`
 
 ## COMMANDS
 
