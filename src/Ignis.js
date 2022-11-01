@@ -4,10 +4,11 @@
 
 const fs = require("node:fs");
 const readline = require("node:readline");
+const {spawn, execSync}  = require("node:child_process");
+const tty = require("node:tty");
 const minimist = require("minimist");
 const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
-const Firestore = require("./firebase/Firestore");
 const History = require("./History");
 const {Utilities} = require("@d4lton/utilities");
 
@@ -70,44 +71,48 @@ class Ignis {
     this.prompt(input);
     input.on("line", async (line) => {
       this._history.add(line);
-      const args = minimist(line.split(" "), {boolean: true});
-      args._ = args._.filter(it => it);
-      try {
-        if (args._.length > 0) {
-          switch (args._[0]) {
-            case "login":
-              await this.handleLoginCommand(args);
-              break;
-            case "cat":
-              await this.handleCatCommand(args);
-              break;
-            case "cp":
-              await this.handleCpCommand(args);
-              break;
-            case "ls":
-              await this.handleLsCommand(args);
-              break;
-            case "project":
-            case "use":
-              await this.handleProjectCommand(args);
-              break;
-            case "projects":
-              await this.handleProjectsCommand(args);
-              break;
-            case "help":
-            case "?":
-              await this.handleHelpCommand(args);
-              break;
-            case "quit":
-              process.exit(0);
-              return;
-            default:
-              console.log(`unknown command: ${args._[0]}`);
-              await this.handleHelpCommand(args);
+      const match = line.match(/\$(.+)/);
+      if (match) {
+        execSync(match[1], {stdio: "inherit", shell: "/bin/sh"});
+      } else {
+        const args = minimist(line.split(" "), {boolean: true});
+        args._ = args._.filter(it => it);
+        try {
+          if (args._.length > 0) {
+            switch (args._[0]) {
+              case "login":
+                await this.handleLoginCommand(args);
+                break;
+              case "cat":
+                await this.handleCatCommand(args);
+                break;
+              case "cp":
+                await this.handleCpCommand(args);
+                break;
+              case "ls":
+                await this.handleLsCommand(args);
+                break;
+              case "use":
+                await this.handleProjectCommand(args);
+                break;
+              case "projects":
+                await this.handleProjectsCommand(args);
+                break;
+              case "help":
+              case "?":
+                await this.handleHelpCommand(args);
+                break;
+              case "quit":
+                process.exit(0);
+                return;
+              default:
+                console.log(`unknown command: ${args._[0]}`);
+                await this.handleHelpCommand(args);
+            }
           }
+        } catch (error) {
+          console.log(error.message);
         }
-      } catch (error) {
-        console.log(error.message);
       }
       this.prompt(input);
     });
@@ -123,21 +128,21 @@ class Ignis {
     console.log("    The specified environment variable should point to the JSON file.");
     console.log("    One of [file|env] must be specified");
     console.log("");
-    console.log("Getting the contents of a document:");
+    console.log("Dump the contents of a document or file (optionally redirecting):");
     console.log("");
-    console.log("  > cat <path> [--out=<filename>]"); // TODO: fix docs
+    console.log("  > cat <path> [> <path>] [--merge] [--parse] [--stringify] [--pretty]");
     console.log("");
     console.log("Copying one document to another:");
     console.log("");
     console.log("  > cp <path> <path> [--merge]");
     console.log("");
-    console.log("Listing documents in a collection or top-level collections:");
+    console.log("Listing documents or collections:");
     console.log("");
     console.log("  > ls <path> [--out=<filename>]");
     console.log("");
     console.log("Switch the current project:");
     console.log("");
-    console.log("  > project [<project-id>]");
+    console.log("  > use [<project-id>]");
     console.log("");
     console.log("List projects:");
     console.log("");
@@ -194,12 +199,13 @@ class Ignis {
     if (!command.valid) { return this.handleHelpCommand(args); }
     let data;
     if (command.source.file) {
-      data = JSON.parse(fs.readFileSync(command.source.path).toString());
+      data = fs.readFileSync(command.source.path).toString();
     } else {
       const projectPathInfo = this.getProjectPathInfo(command.source.path);
       data = await projectPathInfo.firebase.firestore.get(projectPathInfo.path);
     }
     if (args.parse) { data = JSON.parse(data); }
+    if (args.stringify) { data = JSON.stringify(data); }
     data = args.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
     if (command.transfer) {
       if (command.destination.file) {

@@ -16,13 +16,28 @@ Once running, try `help`.
 
     default > login --file=my_firebase_config.json
 
-    default > ls
+    default* > ls
     <list of top-level collections in your default project>
 
-    default > cat config/main
-    <JSON blob representing the contents of this document>
+    default* > cat config/main
+    <JSON blob representing the contents of this document sent to stdout>
 
-    default > cp config/main config/backup
+    default* > cat config/main > some_file.json
+    (dumps contents of "config/main" to a local file named "some_file.json")
+
+    default* > cat some_file.json > config/main
+    (dumps contents of local file named "some_file.json" to "config/main")
+
+    default* > cp config/main config/backup
+    (copies contents of "config/main" to "config/backup")
+
+    default* > use production
+    (switchs project to "production")
+
+    production > login --file=production_firebase_config.json
+
+    production* > cp default:config/main config/main
+    (copies "config/main" from the "default" project to "config/main" in the "production" project)
 
 ## PROJECTS
 
