@@ -73,7 +73,7 @@ class Ignis {
       this._history.add(line);
       const match = line.match(/\$(.+)/);
       if (match) {
-        execSync(match[1], {stdio: "inherit", shell: "/bin/sh"});
+        execSync(match[1], {stdio: "inherit"});
       } else {
         const args = minimist(line.split(" "), {boolean: true});
         args._ = args._.filter(it => it);
