@@ -4,13 +4,15 @@
 
 const fs = require("node:fs");
 const readline = require("node:readline");
-const {spawn, execSync}  = require("node:child_process");
-const tty = require("node:tty");
+const {execSync}  = require("node:child_process");
+const fetch = require("node-fetch");
 const minimist = require("minimist");
+const semver = require("semver");
+const {Utilities} = require("@d4lton/utilities");
+const {Package} = require("@d4lton/utilities");
 const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
 const History = require("./History");
-const {Utilities} = require("@d4lton/utilities");
 
 class Ignis {
 
@@ -73,7 +75,11 @@ class Ignis {
       this._history.add(line);
       const match = line.match(/\$(.+)/);
       if (match) {
-        execSync(match[1], {stdio: "inherit"});
+        try {
+          execSync(match[1], {stdio: "inherit"});
+        } catch (error) {
+          console.log(error.message);
+        }
       } else {
         const args = minimist(line.split(" "), {boolean: true});
         args._ = args._.filter(it => it);
@@ -98,11 +104,15 @@ class Ignis {
               case "projects":
                 await this.handleProjectsCommand(args);
                 break;
+              case "version":
+                await this.handleVersionCommand(args);
+                break;
               case "help":
               case "?":
                 await this.handleHelpCommand(args);
                 break;
               case "quit":
+              case "exit":
                 process.exit(0);
                 return;
               default:
@@ -147,6 +157,10 @@ class Ignis {
     console.log("List projects:");
     console.log("");
     console.log("  > projects [--flush]");
+    console.log("");
+    console.log("Version:");
+    console.log("");
+    console.log("  > version [--check]");
     console.log("");
   }
 
@@ -274,6 +288,24 @@ class Ignis {
       } else {
         console.log("No projects found.");
       }
+    }
+  }
+
+  async handleVersionCommand(args) {
+    try {
+      const pkg = new Package();
+      console.log(`${pkg.name} v${pkg.version}`);
+      if (args.check) {
+        const latest = await fetch(`https://registry.npmjs.org/${pkg.name}/latest`).then(it => it.json());
+        if (semver.gt(latest.version, pkg.version)) {
+          console.log(`There is a newer version of ${pkg.name}: ${latest.version}`);
+          console.log(`You can update with: "npm install -g @d4lton/ignis" (exit ignis first)`);
+        } else {
+          console.log("You are running the latest version");
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
     }
   }
 

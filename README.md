@@ -2,6 +2,10 @@
 
 Ignis is a simple Firebase/Firestore command-line tool that allows you to list, view, and copy collections and documents both within a project and between projects.
 
+## INSTALLATION
+
+    npm install -g @d4lton/ignis
+
 ## USAGE
 
 Start ignis, optionally selecting the default project:

@@ -1,6 +1,6 @@
 {
   "name": "@d4lton/ignis",
-  "version": "1.0.18",
+  "version": "1.0.17",
   "description": "Basic Firestore shell",
   "main": "ignis",
   "scripts": {
@@ -15,7 +15,9 @@
   "dependencies": {
     "@d4lton/utilities": "1.0.21",
     "firebase-admin": "11.2.0",
-    "minimist": "1.2.7"
+    "minimist": "1.2.7",
+    "node-fetch": "2.6.7",
+    "semver": "7.3.8"
   },
   "devDependencies": {
     "mkdirp": "1.0.4"
