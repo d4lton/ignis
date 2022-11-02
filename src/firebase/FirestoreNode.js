@@ -51,11 +51,14 @@ class FirestoreNode {
     if (this._type === "document") {
       if (this._property) {
         const snapshot = await this._ref.get();
+        let document;
         if (snapshot.exists) {
-          const document = snapshot.data();
-          ObjectUtilities.setDottedKeyValue(this._property, data, document);
-          await this._ref.set(document, {merge: merge});
+          document = snapshot.data();
+        } else {
+          document = {};
         }
+        ObjectUtilities.setDottedKeyValue(this._property, data, document);
+        await this._ref.set(document, {merge: merge});
       } else {
         await this._ref.set(data, {merge: merge});
       }
