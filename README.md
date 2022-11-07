@@ -55,7 +55,7 @@ When you first start ignis, you will be in the "default" project (unless you spe
 
 The prompt will show you the current project, and you can switch to a new project with the `project <project-id>` command. Note that `project-id` is an arbitrary ID you create. Spaces aren't allowed in the ID, and it probably makes sense to have it match the project ID for your Firebase project.
 
-Before you can do any operations on a project, you will have to log in with the `login --file=<firebase-config-json>` file. This config will be cached under your `~/.config` directory, so you don't have to log in every time you use ignis.
+Before you can do any operations on a project, you will have to log in with the `login <firebase-config-json>` file. This config will be cached under your `~/.config` directory, so you don't have to log in every time you use ignis.
 
 Any place you use a `<path>`, you can choose to specify a project ID. For example:
 
