@@ -1,4 +1,4 @@
-const {ObjectUtilities} = require("@d4lton/utilities");
+const {Utilities, ObjectUtilities} = require("@d4lton/utilities");
 
 class FirestoreNode {
 
@@ -60,6 +60,7 @@ class FirestoreNode {
         ObjectUtilities.setDottedKeyValue(this._property, data, document);
         await this._ref.set(document, {merge: merge});
       } else {
+        data = Utilities.isObject(data) ? data : JSON.parse(data);
         await this._ref.set(data, {merge: merge});
       }
     } else {

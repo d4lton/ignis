@@ -132,11 +132,9 @@ class Ignis {
     console.log("");
     console.log("Logging into Firebase for the current project:");
     console.log("");
-    console.log("  > login [--file=<JSON filename>] [--env=<environment-variable>]");
+    console.log("  > login <filename>");
     console.log("");
     console.log("    The specified filename should be a JSON file with the Firebase authentication.");
-    console.log("    The specified environment variable should point to the JSON file.");
-    console.log("    One of [file|env] must be specified");
     console.log("");
     console.log("Dump the contents of a document or file (optionally redirecting):");
     console.log("");
@@ -165,17 +163,16 @@ class Ignis {
   }
 
   async handleLoginCommand(args) {
-    if (args.file) {
-      if (fs.existsSync(args.file)) {
-        const json = JSON.parse(fs.readFileSync(args.file).toString());
+    if (args._.length === 2) {
+      const file = args._[1];
+      if (fs.existsSync(file)) {
+        const json = JSON.parse(fs.readFileSync(file).toString());
         if (args.project) { this._project = args.project; }
         this._config.set(`firebase_config.${this._project}`, json);
         this.login(this._project);
       } else {
-        console.log(`Could not find file ${args.file}.`);
+        console.log(`Could not find file "${file}"`);
       }
-    } else if (args.env) {
-      console.log("Not yet implemented.");
     } else {
       await this.handleHelpCommand(args);
     }
@@ -237,7 +234,7 @@ class Ignis {
   async handleCpCommand(args) {
     if (args._.length === 3) {
       const projectPathSourceInfo = this.getProjectPathInfo(args._[1]);
-      const projectPathDestinationInfo = this.getProjectPathInfo(args._[2]);
+      const projectPathDestinationInfo = this.getProjectPathInfo(args._[2], projectPathSourceInfo);
       const data = await projectPathSourceInfo.firebase.firestore.get(projectPathSourceInfo.path);
       if (data) {
         await projectPathDestinationInfo.firebase.firestore.put(projectPathDestinationInfo.path, data, args.merge);
@@ -309,15 +306,20 @@ class Ignis {
     }
   }
 
-  getProjectPathInfo(path) {
+  getProjectPathInfo(path, reference) {
     path = path || "";
     let project = this._project;
     const match = path.match(/^(.+?):(.*)$/);
     if (match) {
-      project = match[1];
-      path = match[2];
+      project = match[1].trim();
+      path = match[2].trim();
     }
     this.ensureLoggedIn(project);
+    if (reference) {
+      if (path === "." || !path) {
+        path = reference.path;
+      }
+    }
     const firebase = this._firebases[project];
     if (!firebase) {
       throw new Error(`No login found for project "${project}"`);

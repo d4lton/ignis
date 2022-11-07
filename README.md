@@ -2,6 +2,8 @@
 
 Ignis is a simple Firebase/Firestore command-line tool that allows you to list, view, and copy collections and documents both within a project and between projects.
 
+IMPORTANT: This tool will modify your Firestore database, please be careful and know what you are doing. Always make backups and double-check commands! This tool is intended for power users only.
+
 ## INSTALLATION
 
     npm install -g @d4lton/ignis
@@ -26,8 +28,11 @@ Once running, try `help`.
     default* > cat config/main
     <JSON blob representing the contents of this document sent to stdout>
 
-    default* > cat config/main > some_file.json
+    default* > cat config/main > some_file.json --pretty
     (dumps contents of "config/main" to a local file named "some_file.json")
+
+    default* > $vi some_file.json
+    (opens vi to allow editing of some_file.json, note that "$" will execute any shell command)
 
     default* > cat some_file.json > config/main
     (dumps contents of local file named "some_file.json" to "config/main")
@@ -36,9 +41,9 @@ Once running, try `help`.
     (copies contents of "config/main" to "config/backup")
 
     default* > use production
-    (switchs project to "production")
+    (switches project to "production")
 
-    production > login --file=production_firebase_config.json
+    production > login production_firebase_config.json
 
     production* > cp default:config/main config/main
     (copies "config/main" from the "default" project to "config/main" in the "production" project)
