@@ -20,7 +20,8 @@ Once running, try `help`.
 
 ## EXAMPLES
 
-    default > login --file=my_firebase_config.json
+    default > login my_firebase_config.json
+    <set the Firebase login keys for the current project>
 
     default* > ls
     <list of top-level collections in your default project>
@@ -61,3 +62,13 @@ Any place you use a `<path>`, you can choose to specify a project ID. For exampl
     production > cp production:config/main staging:config/main
 
 This will copy the `config/main` document in your `production` project to `config/main` in your `staging` project.
+
+## SECURITY
+
+The configuration file is stored in ".config/com.basken.ignis/config.json" and is plaintext by default. If you want this file to be encrypted:
+
+- exit from ignis
+- delete `.config/com.basken.ignis/config.json`
+- set the `IGNIS_ENCRYPTION_KEY` environment variable to a 32 character (256 bit) AES-256 key
+- run ignis and set your projects up with `use` and `login` as before
+- the `.config/com.basken.ignis/config.json` config file should be encrypted
