@@ -27,7 +27,7 @@ class UseCommand extends Command {
       this._ignis.project = args._[0]
       this.project = args._[1];
     } else {
-      // show help
+      this.renderHelp();
     }
   }
 

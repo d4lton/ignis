@@ -15,10 +15,13 @@ class CatCommand extends Command {
     return {
       description: "Dump the contents of a path",
       required: [
-        {arg: "<src-path>", description: "Source path"},
+        {arg: "<src-path>", description: "Source path (firestore path or local file)"},
       ],
       optional: [
-        {arg: "> <dst-path>", description: "Destination path"}
+        {arg: "> <dst-path>", description: "Destination path (firestore path or local file)"}
+      ],
+      notes: [
+        "Either <src-path> or <dst-path> can be a firestore path or file, but both"
       ]
     }
   }
@@ -54,7 +57,7 @@ class CatCommand extends Command {
 
   async execute(args) {
     const command = this.parseCatCommand(args);
-    if (!command.valid) { return; } // show help
+    if (!command.valid) { return this.renderHelp(); }
     let data;
     if (command.source.file) {
       data = fs.readFileSync(command.source.path).toString();

@@ -33,6 +33,10 @@ class LsCommand extends Command {
     if (args._.length < 2) {
       const projectPathInfo = this._ignis.getProjectPathInfo(args._[0]);
       const data = await projectPathInfo.firebase.firestore.list(projectPathInfo.path);
+      if (!data?.length) {
+        console.log("Nothing found.");
+        return;
+      }
       if (args.out) { // TODO: use > like in cat
         fs.writeFileSync(args.out, JSON.stringify(data));
       } else {
@@ -41,7 +45,7 @@ class LsCommand extends Command {
         }
       }
     } else {
-      // show help
+      this.renderHelp();
     }
   }
 

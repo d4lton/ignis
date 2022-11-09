@@ -23,38 +23,70 @@ class Command {
     return [];
   }
 
-  renderHelp() {
-    const lines = [];
-    lines.push(`${this.help.description}:`);
+  getBasicHelpInfo() {
+    return {
+      usage: this._getUsageText(),
+      description: this.help.description
+    }
+  }
+
+  _getUsageText() {
     const usage = [];
-    const args = [];
-    let maxArgLength = Number.NEGATIVE_INFINITY;
     usage.push(this.command);
     if (this.help.required?.length) {
       for (const required of this.help.required) {
         usage.push(required.arg);
+      }
+    }
+    if (this.help.optional?.length) {
+      for (const optional of this.help.optional) {
+        usage.push(`[${optional.arg}]`);
+      }
+    }
+    return usage.join(" ");
+  }
+
+  getExtendedHelpText() {
+    const lines = [];
+    lines.push(`${this.help.description}:`);
+    const args = [];
+    let maxArgLength = Number.NEGATIVE_INFINITY;
+    if (this.help.required?.length) {
+      for (const required of this.help.required) {
         args.push(required);
         if (required.arg.length > maxArgLength) { maxArgLength = required.arg.length; }
       }
     }
     if (this.help.optional?.length) {
       for (const optional of this.help.optional) {
-        usage.push(`[${optional.arg}]`);
         args.push(optional);
         if (optional.arg.length > maxArgLength) { maxArgLength = optional.arg.length; }
       }
     }
     lines.push("");
-    lines.push(`  > ${usage.join(" ")}`);
+    lines.push(`  > ${this._getUsageText()}`);
     if (args.length) {
       lines.push("");
       for (const arg of args) {
         const spaces = maxArgLength - arg.arg.length;
-
         lines.push(`    ${" ".repeat(spaces)}${arg.arg} - ${arg.description}`);
       }
     }
+    if (this.help.notes) {
+      lines.push("");
+      lines.push("NOTES:");
+      lines.push("");
+      for (const note of this.help.notes) {
+        lines.push(`  - ${note}`);
+      }
+    }
     return lines.join("\n");
+  }
+
+  renderHelp() {
+    console.log("");
+    console.log(this.getHelpText());
+    console.log("");
   }
 
 }

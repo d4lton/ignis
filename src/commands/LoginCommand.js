@@ -28,7 +28,7 @@ class LoginCommand extends Command {
         console.log(`Could not find file "${file}"`);
       }
     } else {
-      // show help
+      this.renderHelp();
     }
   }
 

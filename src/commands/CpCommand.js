@@ -28,7 +28,7 @@ class CpCommand extends Command {
         await projectPathDestinationInfo.firebase.firestore.put(projectPathDestinationInfo.path, data, args.merge);
       }
     } else {
-      // show help
+      this.renderHelp();
     }
   }
 
