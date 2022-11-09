@@ -2,17 +2,14 @@
  * Copyright ©2022 Dana Basken
  */
 
-const fs = require("node:fs");
+const path = require("node:path");
 const readline = require("node:readline");
 const {execSync}  = require("node:child_process");
-const fetch = require("node-fetch");
-const minimist = require("minimist");
-const semver = require("semver");
 const {Utilities} = require("@d4lton/utilities");
-const {Package} = require("@d4lton/utilities");
 const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
 const History = require("./History");
+const CommandManager = require("./commands/CommandManager");
 
 class Ignis {
 
@@ -21,11 +18,12 @@ class Ignis {
 
   constructor(argv) {
     this._argv = argv;
-    this._project = this._argv.project || this._config.get("project") || "default";
+    this.project = this._argv.project || this._config.get("project") || "default";
     this._history = new History(this._config);
+    this._commandManager = new CommandManager(this);
   }
 
-  ensureLoggedIn(project) {
+  _ensureLoggedIn(project) {
     if (!this._firebases[project]) {
       this.login(project);
     }
@@ -51,12 +49,17 @@ class Ignis {
   }
 
   async completer(line, callback) {
-    let completions = ["login", "cat", "cp", "ls", "project", "projects"];
+    let completions = this.commandManager.commandNames;
     let hits;
     if (Utilities.isEmpty(line)) {
       hits = completions;
     } else {
-      hits = completions.filter(completion => completion.startsWith(line));
+      const commandInfo = this.commandManager.findCommandInfo(line);
+      if (commandInfo) {
+        hits = await commandInfo.command.completer(commandInfo);
+      } else {
+        hits = completions.filter(completion => completion.startsWith(line));
+      }
     }
     callback(null, [hits, line]);
   }
@@ -73,237 +76,41 @@ class Ignis {
     this.prompt(input);
     input.on("line", async (line) => {
       this._history.add(line);
-      const match = line.match(/\$(.+)/);
-      if (match) {
-        try {
+      try {
+        const match = line.match(/\$(.+)/);
+        if (match) {
           execSync(match[1], {stdio: "inherit"});
-        } catch (error) {
-          console.log(error.message);
+        } else {
+          await this.commandManager.execute(line);
         }
-      } else {
-        const args = minimist(line.split(" "), {boolean: true});
-        args._ = args._.filter(it => it);
-        try {
-          if (args._.length > 0) {
-            switch (args._[0]) {
-              case "login":
-                await this.handleLoginCommand(args);
-                break;
-              case "cat":
-                await this.handleCatCommand(args);
-                break;
-              case "cp":
-                await this.handleCpCommand(args);
-                break;
-              case "ls":
-                await this.handleLsCommand(args);
-                break;
-              case "use":
-                await this.handleProjectCommand(args);
-                break;
-              case "projects":
-                await this.handleProjectsCommand(args);
-                break;
-              case "version":
-                await this.handleVersionCommand(args);
-                break;
-              case "help":
-              case "?":
-                await this.handleHelpCommand(args);
-                break;
-              case "quit":
-              case "exit":
-                process.exit(0);
-                return;
-              default:
-                console.log(`unknown command: ${args._[0]}`);
-                await this.handleHelpCommand(args);
-            }
-          }
-        } catch (error) {
-          console.log(error.message);
-        }
+      } catch (error) {
+        console.log(error.message);
       }
       this.prompt(input);
     });
   }
 
-  async handleHelpCommand(args) {
-    console.log("");
-    console.log("Logging into Firebase for the current project:");
-    console.log("");
-    console.log("  > login <filename>");
-    console.log("");
-    console.log("    The specified filename should be a JSON file with the Firebase authentication.");
-    console.log("");
-    console.log("Dump the contents of a document or file (optionally redirecting):");
-    console.log("");
-    console.log("  > cat <path> [> <path>] [--merge] [--parse] [--stringify] [--pretty]");
-    console.log("");
-    console.log("Copying one document to another:");
-    console.log("");
-    console.log("  > cp <path> <path> [--merge]");
-    console.log("");
-    console.log("Listing documents or collections:");
-    console.log("");
-    console.log("  > ls <path> [--out=<filename>]");
-    console.log("");
-    console.log("Switch the current project:");
-    console.log("");
-    console.log("  > use [<project-id>]");
-    console.log("");
-    console.log("List projects:");
-    console.log("");
-    console.log("  > projects [--flush]");
-    console.log("");
-    console.log("Version:");
-    console.log("");
-    console.log("  > version [--check]");
-    console.log("");
+  set project(value) {
+    this._project = value;
+    this._config.set("project", this._project);
+    this.login(this._project);
   }
 
-  async handleLoginCommand(args) {
-    if (args._.length === 2) {
-      const file = args._[1];
-      if (fs.existsSync(file)) {
-        const json = JSON.parse(fs.readFileSync(file).toString());
-        if (args.project) { this._project = args.project; }
-        this._config.set(`firebase_config.${this._project}`, json);
-        this.login(this._project);
-      } else {
-        console.log(`Could not find file "${file}"`);
-      }
-    } else {
-      await this.handleHelpCommand(args);
-    }
+  get project() {
+    return this._project;
   }
 
-  parseCatCommand(args) {
-    let result = {valid: false};
-    const line = args._.join(" ");
-    const match = line.match(/\s*cat\s+(.+)\s*>\s*(.+)\s*/);
-    if (match) {
-      const path1 = match[1].trim();
-      const path2 = match[2].trim();
-      const path1IsFile = fs.existsSync(path1);
-      const path2IsFile = fs.existsSync(path2);
-      if (path1IsFile && path2IsFile) { return result; }
-      result = {valid: true, transfer: true, source: {file: path1IsFile, path: path1}, destination: {file: path2IsFile, path: path2}};
-      if (!path1IsFile && !path2IsFile) { result.destination.file = true; }
-    } else {
-      const match = line.match(/\s*cat\s+(.+)\s*/)
-      if (match) {
-        const path = match[1];
-        const pathIsFile = fs.existsSync(path);
-        if (pathIsFile) {
-          result = {valid: true, transfer: false, source: {file: true, path: path}};
-        } else {
-          result = {valid: true, transfer: false, source: {file: false, path: path}};
-        }
-      }
-    }
-    return result;
+  get projects() {
+    const firebaseConfig = this._config.get("firebase_config", {});
+    return Object.keys(firebaseConfig);
   }
 
-  async handleCatCommand(args) {
-    const command = this.parseCatCommand(args);
-    if (!command.valid) { return this.handleHelpCommand(args); }
-    let data;
-    if (command.source.file) {
-      data = fs.readFileSync(command.source.path).toString();
-    } else {
-      const projectPathInfo = this.getProjectPathInfo(command.source.path);
-      data = await projectPathInfo.firebase.firestore.get(projectPathInfo.path);
-    }
-    if (args.parse) { data = JSON.parse(data); }
-    if (args.stringify) { data = JSON.stringify(data); }
-    data = args.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-    if (command.transfer) {
-      if (command.destination.file) {
-        fs.writeFileSync(command.destination.path, data);
-      } else {
-        const projectPathInfo = this.getProjectPathInfo(command.destination.path);
-        if (typeof data === "string") { data = JSON.parse(data); }
-        await projectPathInfo.firebase.firestore.put(projectPathInfo.path, data, args.merge);
-      }
-    } else {
-      console.log(data);
-    }
+  get commandManager() {
+    return this._commandManager;
   }
 
-  async handleCpCommand(args) {
-    if (args._.length === 3) {
-      const projectPathSourceInfo = this.getProjectPathInfo(args._[1]);
-      const projectPathDestinationInfo = this.getProjectPathInfo(args._[2], projectPathSourceInfo);
-      const data = await projectPathSourceInfo.firebase.firestore.get(projectPathSourceInfo.path);
-      if (data) {
-        await projectPathDestinationInfo.firebase.firestore.put(projectPathDestinationInfo.path, data, args.merge);
-      }
-    } else {
-      await this.handleHelpCommand(args);
-    }
-  }
-
-  async handleLsCommand(args) {
-    if (args._.length === 1 || args._.length === 2) {
-      const projectPathInfo = this.getProjectPathInfo(args._[1]);
-      const data = await projectPathInfo.firebase.firestore.list(projectPathInfo.path);
-      if (args.out) { // TODO: use > like in cat
-        fs.writeFileSync(args.out, JSON.stringify(data));
-      } else {
-        for (const path of data) {
-          console.log(path);
-        }
-      }
-    } else {
-      await this.handleHelpCommand(args);
-    }
-  }
-
-  async handleProjectCommand(args) {
-    if (args._.length === 1) {
-      console.log(`project: ${this._project}`);
-    } else if (args._.length === 2) {
-      this._project = args._[1];
-      this._config.set("project", this._project);
-      this.login(this._project);
-    } else {
-      await this.handleHelpCommand(args);
-    }
-  }
-
-  async handleProjectsCommand(args) {
-    if (args.flush) {
-      await this.flush();
-    } else {
-      const firebaseConfig = this._config.get("firebase_config", {});
-      const projects = Object.keys(firebaseConfig);
-      if (projects.length) {
-        for (const project of projects) {
-          console.log(project);
-        }
-      } else {
-        console.log("No projects found.");
-      }
-    }
-  }
-
-  async handleVersionCommand(args) {
-    try {
-      const pkg = new Package();
-      console.log(`${pkg.name} v${pkg.version}`);
-      if (args.check) {
-        const latest = await fetch(`https://registry.npmjs.org/${pkg.name}/latest`).then(it => it.json());
-        if (semver.gt(latest.version, pkg.version)) {
-          console.log(`There is a newer version of ${pkg.name}: ${latest.version}`);
-          console.log(`You can update with: "npm install -g @d4lton/ignis" (exit ignis first)`);
-        } else {
-          console.log("You are running the latest version");
-        }
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
+  get config() {
+    return this._config;
   }
 
   getProjectPathInfo(path, reference) {
@@ -314,7 +121,7 @@ class Ignis {
       project = match[1].trim();
       path = match[2].trim();
     }
-    this.ensureLoggedIn(project);
+    this._ensureLoggedIn(project);
     if (reference) {
       if (path === "." || !path) {
         path = reference.path;
@@ -324,7 +131,14 @@ class Ignis {
     if (!firebase) {
       throw new Error(`No login found for project "${project}"`);
     }
-    return {project: project, path: path, firebase: firebase};
+    return {project: project, path: path, firebase: firebase, components: this._getPathComponentsFromFilename(path)};
+  }
+
+  _getPathComponentsFromFilename(filename) {
+    return {
+      path: path.dirname(filename),
+      file: path.basename(filename)
+    }
   }
 
   async flush() {

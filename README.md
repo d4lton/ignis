@@ -2,7 +2,7 @@
 
 Ignis is a simple Firebase/Firestore command-line tool that allows you to list, view, and copy collections and documents both within a project and between projects.
 
-IMPORTANT: This tool will modify your Firestore database, please be careful and know what you are doing. Always make backups and double-check commands! This tool is intended for power users only.
+**IMPORTANT: This tool will modify your Firestore database, please be careful and know what you are doing. Always make backups and double-check commands! This tool is intended for power users only.**
 
 ## INSTALLATION
 
@@ -63,12 +63,16 @@ Any place you use a `<path>`, you can choose to specify a project ID. For exampl
 
 This will copy the `config/main` document in your `production` project to `config/main` in your `staging` project.
 
-## SECURITY
+## CONFIGURATION SECURITY
 
-The configuration file is stored in ".config/com.basken.ignis/config.json" and is plaintext by default. If you want this file to be encrypted:
+The configuration file is stored in ".config/com.basken.ignis/config.json" in your home directory, and is plaintext by default. If you want this file to be encrypted:
 
 - exit from ignis
 - delete `.config/com.basken.ignis/config.json`
 - set the `IGNIS_ENCRYPTION_KEY` environment variable to a 32 character (256 bit) AES-256 key
 - run ignis and set your projects up with `use` and `login` as before
 - the `.config/com.basken.ignis/config.json` config file should be encrypted
+
+## WARNING ABOUT CORE-JS
+
+When ignis is installed, you will see a warning about `core-js` being deprecated. This is a package included by the `firebase-admin` module, and from what I understand, is harmless. The `core-js` package, while included in `firebase-admin`, is not actually used. Hopefully this unused package will be removed in the near future so the warning will go away.
