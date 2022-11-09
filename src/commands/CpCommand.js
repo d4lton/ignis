@@ -6,6 +6,10 @@ const Command = require("./Command");
 
 class CpCommand extends Command {
 
+  async completer(commandInfo) {
+    return this.pathCompleter(commandInfo);
+  }
+
   get help() {
     return {
       description: "Copy a document",
@@ -21,8 +25,8 @@ class CpCommand extends Command {
 
   async execute(args) {
     if (args._.length === 2) {
-      const projectPathSourceInfo = this._ignis.getProjectPathInfo(args._[1]);
-      const projectPathDestinationInfo = this._ignis.getProjectPathInfo(args._[2], projectPathSourceInfo);
+      const projectPathSourceInfo = this._ignis.getProjectPathInfo(args._[0]);
+      const projectPathDestinationInfo = this._ignis.getProjectPathInfo(args._[1], projectPathSourceInfo);
       const data = await projectPathSourceInfo.firebase.firestore.get(projectPathSourceInfo.path);
       if (data) {
         await projectPathDestinationInfo.firebase.firestore.put(projectPathDestinationInfo.path, data, args.merge);

@@ -11,6 +11,10 @@ const Command = require("./Command");
 
 class CatCommand extends Command {
 
+  async completer(commandInfo) {
+    return this.pathCompleter(commandInfo);
+  }
+
   get help() {
     return {
       description: "Dump the contents of a path",

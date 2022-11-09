@@ -25,6 +25,17 @@ class Command {
     return [];
   }
 
+  async pathCompleter(commandInfo) {
+    const path = commandInfo.components.args._.pop();
+    const prefix = [commandInfo.components.command, ...commandInfo.components.args._].join(" ");
+    const projectPathInfo = this._ignis.getProjectPathInfo(path);
+    const listPath = projectPathInfo.components.path !== "." ? projectPathInfo.components.path : "";
+    const data = await projectPathInfo.firebase.firestore.list(listPath);
+    return data
+      .filter(path => path.startsWith(projectPathInfo.path))
+      .map(it => `${prefix} ${projectPathInfo.projectSpecified ? `${projectPathInfo.project}:` : ""}${it}`);
+  }
+
   getBasicHelpInfo() {
     return {
       usage: this._getUsageText(),

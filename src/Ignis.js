@@ -118,8 +118,10 @@ class Ignis {
   getProjectPathInfo(path, reference) {
     path = path || "";
     let project = this._project;
+    let projectSpecified = false;
     const match = path.match(/^(.+?):(.*)$/);
     if (match) {
+      projectSpecified = true;
       project = match[1].trim();
       path = match[2].trim();
     }
@@ -133,7 +135,13 @@ class Ignis {
     if (!firebase) {
       throw new Error(`No login found for project "${project}"`);
     }
-    return {project: project, path: path, firebase: firebase, components: this._getPathComponentsFromFilename(path)};
+    return {
+      project: project,
+      projectSpecified: projectSpecified,
+      path: path,
+      firebase: firebase,
+      components: this._getPathComponentsFromFilename(path)
+    };
   }
 
   _getPathComponentsFromFilename(filename) {

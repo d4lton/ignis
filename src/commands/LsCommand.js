@@ -8,12 +8,7 @@ const Command = require("./Command");
 class LsCommand extends Command {
 
   async completer(commandInfo) {
-    const path = commandInfo.components.args._.pop();
-    const prefix = [commandInfo.components.command, ...commandInfo.components.args._].join(" ");
-    const projectPathInfo = this._ignis.getProjectPathInfo(path);
-    const listPath = projectPathInfo.components.path !== "." ? projectPathInfo.components.path : "";
-    const data = await projectPathInfo.firebase.firestore.list(listPath);
-    return data.filter(path => path.startsWith(projectPathInfo.path)).map(it => `${prefix} ${it}`);
+    return this.pathCompleter(commandInfo);
   }
 
   get help() {
