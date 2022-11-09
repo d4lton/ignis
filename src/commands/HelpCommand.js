@@ -2,6 +2,7 @@
  * Copyright ©2022 Dana Basken
  */
 
+const chalk = require("chalk");
 const Command = require("./Command");
 
 class HelpCommand extends Command {
@@ -39,7 +40,7 @@ class HelpCommand extends Command {
       }
       console.log("");
       for (const line of lines) {
-        console.log(`  ${" ".repeat(maxUsageLength - line.usage.length)}${line.usage} - ${line.description}`);
+        console.log(`  ${" ".repeat(maxUsageLength - line.usage.length)}${line.usage} - ${chalk.dim(line.description)}`);
       }
       console.log("");
       console.log(` You may get detailed help by specifying the command name to help: "help cat"`);

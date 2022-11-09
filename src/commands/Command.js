@@ -2,6 +2,8 @@
  * Copyright ©2022 Dana Basken
  */
 
+const chalk = require("chalk");
+
 class Command {
 
   constructor(ignis) {
@@ -69,7 +71,7 @@ class Command {
       lines.push("");
       for (const arg of args) {
         const spaces = maxArgLength - arg.arg.length;
-        lines.push(`    ${" ".repeat(spaces)}${arg.arg} - ${arg.description}`);
+        lines.push(`    ${" ".repeat(spaces)}${arg.arg} - ${chalk.dim(arg.description)}`);
       }
     }
     if (this.help.notes) {

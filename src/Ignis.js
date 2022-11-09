@@ -5,6 +5,7 @@
 const path = require("node:path");
 const readline = require("node:readline");
 const {execSync}  = require("node:child_process");
+const chalk = require("chalk");
 const {Utilities} = require("@d4lton/utilities");
 const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
@@ -43,8 +44,9 @@ class Ignis {
   }
 
   prompt(input) {
-    const loginIndicator = this._firebases[this._project] ? "*" : "";
-    input.setPrompt(`ignis@${this._project}${loginIndicator} > `);
+    const loggedIn = !!this._firebases[this._project];
+    const projectName = loggedIn ? chalk.green(this._project) : chalk.yellow(this._project);
+    input.setPrompt(`${chalk.red.dim("ignis")} ${projectName} > `);
     input.prompt();
   }
 
