@@ -10,7 +10,9 @@ class HelpCommand extends Command {
     return {
       description: "Help",
       required: [],
-      optional: []
+      optional: [
+        {arg: "<command>", description: "Get detailed help for <command>"},
+      ]
     }
   }
 

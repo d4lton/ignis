@@ -44,7 +44,7 @@ class Ignis {
 
   prompt(input) {
     const loginIndicator = this._firebases[this._project] ? "*" : "";
-    input.setPrompt(`${this._project}${loginIndicator} > `);
+    input.setPrompt(`ignis@${this._project}${loginIndicator} > `);
     input.prompt();
   }
 
