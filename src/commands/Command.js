@@ -98,7 +98,7 @@ class Command {
 
   renderHelp() {
     console.log("");
-    console.log(this.getHelpText());
+    console.log(this._getUsageText());
     console.log("");
   }
 

@@ -11,10 +11,11 @@ class FirestoreNode {
       this._type = "root";
     } else if (parts.length % 2 === 0) {
       this._type = "document";
-      const match = this._path.match(/^(.+?)\.(.+)$/);
+      const match = this._path.match(/^"(.+?)"$|^"(.+?)"\.(.+)$|^(.+?)\.(.+)$/);
       if (match) {
-        this._path = match[1];
-        this._property = match[2];
+        const parts = match.filter(it => it);
+        this._path = parts[1];
+        this._property = parts[2];
       }
       this._ref = this._app.firestore().doc(this._path);
     } else {
