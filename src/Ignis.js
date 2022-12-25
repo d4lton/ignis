@@ -20,6 +20,7 @@ class Ignis {
   constructor(argv) {
     this._argv = argv;
     this.project = this._argv.project || this._config.get("project") || "default";
+    this.editor = this._argv.editor || this._config.get("editor") || "";
     this._history = new History(this._config);
     this._commandManager = new CommandManager(this);
   }
@@ -100,6 +101,15 @@ class Ignis {
 
   get project() {
     return this._project;
+  }
+
+  set editor(value) {
+    this._editor = value;
+    this._config.set("editor", this._editor);
+  }
+
+  get editor() {
+    return this._editor;
   }
 
   get projects() {

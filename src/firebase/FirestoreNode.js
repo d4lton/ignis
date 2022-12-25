@@ -11,7 +11,7 @@ class FirestoreNode {
       this._type = "root";
     } else if (parts.length % 2 === 0) {
       this._type = "document";
-      const match = this._path.match(/^"(.+?)"$|^"(.+?)"\.(.+)$|^(.+?)\.(.+)$/);
+      const match = this._path.match(/^(.+?)!(.+)$|^(.+)$/);
       if (match) {
         const parts = match.filter(it => it);
         this._path = parts[1];

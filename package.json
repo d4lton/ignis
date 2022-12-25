@@ -13,12 +13,14 @@
   "repository": "https://github.com/d4lton/ignis",
   "license": "MIT",
   "dependencies": {
-    "@d4lton/utilities": "1.0.24",
+    "@d4lton/utilities": "1.0.43",
     "chalk": "4.1.2",
-    "firebase-admin": "11.2.0",
+    "firebase-admin": "11.4.1",
     "minimist": "1.2.7",
     "node-fetch": "2.6.7",
-    "semver": "7.3.8"
+    "semver": "7.3.8",
+    "temp": "^0.9.4",
+    "which": "3.0.0"
   },
   "devDependencies": {
     "mkdirp": "1.0.4"
