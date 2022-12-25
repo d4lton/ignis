@@ -40,9 +40,13 @@ class EditCommand extends Command {
     const filename = temp.path({suffix: ".json"});
     fs.writeFileSync(filename, data);
     execSync(`${editor} ${filename}`, {stdio: "inherit"});
-    data = fs.readFileSync(filename).toString();
+    const updatedData = fs.readFileSync(filename).toString();
     fs.unlinkSync(filename);
-    await projectPathInfo.firebase.firestore.put(projectPathInfo.path, data, args.merge);
+    if (data !== updatedData) {
+      await projectPathInfo.firebase.firestore.put(projectPathInfo.path, updatedData, args.merge);
+    } else {
+      console.log("No changes detected.");
+    }
   }
 
 }
