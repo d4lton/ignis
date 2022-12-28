@@ -4,6 +4,7 @@
 
 const minimist = require("minimist");
 const CatCommand = require("./CatCommand");
+const ClaimsCommand = require("./ClaimsCommand");
 const CpCommand = require("./CpCommand");
 const EditCommand = require("./EditCommand");
 const EditorCommand = require("./EditorCommand");
@@ -19,6 +20,7 @@ class CommandManager {
 
   COMMANDS = [
     CatCommand,
+    ClaimsCommand,
     CpCommand,
     EditCommand,
     EditorCommand,

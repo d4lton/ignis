@@ -125,6 +125,10 @@ class Ignis {
     return this._config;
   }
 
+  get firebase() {
+    return this._firebases[this._project];
+  }
+
   getProjectPathInfo(path, reference) {
     path = path || "";
     let project = this._project;
