@@ -52,7 +52,11 @@ class ClaimsCommand extends Command {
     } else if (args._.length === 3) {
       const user = await this.getUser(args._[0], args.uid);
       const claims = user.customClaims || {};
-      claims[args._[1]] = args._[2];
+      if (args.parse) {
+        claims[args._[1]] = JSON.parse(args._[2]);
+      } else {
+        claims[args._[1]] = args._[2];
+      }
       await this._ignis.firebase.app.auth().setCustomUserClaims(user.uid, claims);
       await this.showClaims(await this.getUser(args._[0], args.uid), args.pretty);
     }

@@ -8,7 +8,14 @@
     "patch": "npm --no-git-tag-version version patch",
     "release": "npm run patch"
   },
-  "keywords": [],
+  "keywords": [
+    "firebase",
+    "firestore",
+    "cli",
+    "admin",
+    "utility",
+    "tools"
+  ],
   "author": "Dana Basken <dbasken@gmail.com",
   "repository": "https://github.com/d4lton/ignis",
   "license": "MIT",
