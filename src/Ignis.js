@@ -174,6 +174,15 @@ class Ignis {
     console.log("All projects removed.");
   }
 
+  async removeProject(name) {
+    const firebaseConfig = this._config.get("firebase_config", {});
+    if (firebaseConfig[name]) {
+      if (this._firebases[name]) { this._firebases[name].app.delete(); }
+      delete firebaseConfig[name];
+      this._config.set("firebase_config", firebaseConfig);
+    }
+  }
+
 }
 
 module.exports = Ignis;

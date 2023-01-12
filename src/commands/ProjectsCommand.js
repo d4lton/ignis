@@ -10,7 +10,10 @@ class ProjectsCommand extends Command {
     return {
       description: "List projects",
       required: [],
-      optional: [{arg: "--flush", description: "Remove all saved projects"}]
+      optional: [
+        {arg: "--flush", description: "Remove all saved projects"},
+        {arg: "--remove <project-id>", description: "Remove a specific project"}
+      ]
     }
   }
 
@@ -19,6 +22,16 @@ class ProjectsCommand extends Command {
   async execute(args) {
     if (args.flush) {
       this._ignis.flush();
+      return;
+    }
+    if (args.remove) {
+      if (args._.length !== 1) { return this.renderHelp(); }
+      const name = args._[0];
+      const project = this._ignis.projects.find(it => it === name);
+      if (!project) {
+        console.log(`Project "${name}" was not found.`);
+      }
+      this._ignis.removeProject(name);
       return;
     }
     if (this._ignis.projects.length) {
