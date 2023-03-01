@@ -48,6 +48,14 @@ class FirestoreNode {
     }
   }
 
+  async delete() {
+    if (this._type === "document") {
+      this._ref.delete();
+      } else {
+      throw new Error(`Cannot delete a collection at path "${this._path}"`);
+    }
+  }
+
   async put(data, merge = false) {
     if (this._type === "document") {
       if (this._property) {

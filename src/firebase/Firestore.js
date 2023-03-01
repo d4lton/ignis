@@ -29,6 +29,11 @@ class Firestore {
     }
   }
 
+  async delete(path) {
+    const node = new FirestoreNode(path, this._firebase.app);
+    await node.delete();
+  }
+
   async list(path) {
     const node = new FirestoreNode(path, this._firebase.app);
     return node.list();

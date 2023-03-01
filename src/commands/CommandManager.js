@@ -13,6 +13,7 @@ const LoginCommand = require("./LoginCommand");
 const LsCommand = require("./LsCommand");
 const ProjectsCommand = require("./ProjectsCommand");
 const QuitCommand = require("./QuitCommand");
+const RmCommand = require("./RmCommand");
 const UseCommand = require("./UseCommand");
 const VersionCommand = require("./VersionCommand");
 
@@ -29,6 +30,7 @@ class CommandManager {
     LsCommand,
     ProjectsCommand,
     QuitCommand,
+    RmCommand,
     UseCommand,
     VersionCommand
   ];
