@@ -2,7 +2,6 @@
  * Copyright ©2022 Dana Basken
  */
 
-const {UserRecord} = require("firebase-admin/auth");
 const {Utilities} = require("@d4lton/utilities");
 const Command = require("./Command");
 
