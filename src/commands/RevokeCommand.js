@@ -13,9 +13,7 @@ class RevokeCommand extends Command {
         {arg: "<id>", description: "ID of user (email or UID, default email)"},
       ],
       optional: [
-        {arg: "<name> <value>", description: "Set claim value"},
-        {arg: "--uid", description: "The ID is a UID"},
-        {arg: "--pretty", description: "Make the JSON pretty"}
+        {arg: "--uid", description: "The ID is a UID"}
       ]
     }
   }
