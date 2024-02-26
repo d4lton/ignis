@@ -22,7 +22,9 @@ class CatCommand extends Command {
         {arg: "<src-path>", description: "Source path (firestore path or local file)"},
       ],
       optional: [
-        {arg: "> <dst-path>", description: "Destination path (firestore path or local file)"}
+        {arg: "> <dst-path>", description: "Destination path (firestore path or local file)"},
+        {arg: "--stringify", description: "Convert to a JSON string"},
+        {arg: "--pretty", description: "Make the JSON pretty"}
       ],
       notes: [
         "Either <src-path> or <dst-path> can be a firestore path or file, but both"

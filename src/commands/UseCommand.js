@@ -24,7 +24,7 @@ class UseCommand extends Command {
 
   async execute(args) {
     if (args._.length === 1) {
-      this._ignis.project = args._[0]
+      this._ignis.project = args._[0];
     } else {
       this.renderHelp();
     }

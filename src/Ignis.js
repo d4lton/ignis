@@ -47,7 +47,12 @@ class Ignis {
   prompt(input) {
     const loggedIn = !!this._firebases[this._project];
     const projectName = loggedIn ? chalk.green(this._project) : chalk.yellow(this._project);
-    input.setPrompt(`${chalk.red.dim("ignis")} ${projectName} > `);
+    let emulator;
+    if (loggedIn) {
+      const config = this._config.get(`firebase_config.${this._project}`);
+      emulator = config?.type === "emulator";
+    }
+    input.setPrompt(`${chalk.red.dim("ignis")} ${projectName} ${emulator ? chalk.gray("[emulated]") : ""} > `);
     input.prompt();
   }
 

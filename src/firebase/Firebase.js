@@ -15,9 +15,13 @@ class Firebase {
     const projectConfig = firebaseConfig[project];
     if (!projectConfig) { throw new Error(`No Firebase configuration found for project "${this._project}"`); }
     if (projectConfig.type === "emulator") {
-      process.env.FIRESTORE_EMULATOR_HOST = projectConfig.FIRESTORE_EMULATOR_HOST;
-      this._app = admin.initializeApp({projectId: projectConfig.projectId}, this._project);
+      process.env.GOOGLE_CLOUD_PROJECT = project;
+      process.env.FIREBASE_AUTH_EMULATOR_HOST = "127.0.0.1:9099";
+      process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
+      this._app = admin.initializeApp({projectId: projectConfig.projectId}, `${this._project}-emulator`);
     } else {
+      delete process.env.GOOGLE_CLOUD_PROJECT;
+      delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
       delete process.env.FIRESTORE_EMULATOR_HOST;
       this._app = admin.initializeApp({credential: admin.credential.cert(projectConfig)}, this._project);
     }

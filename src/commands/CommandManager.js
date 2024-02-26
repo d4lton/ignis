@@ -8,6 +8,8 @@ const ClaimsCommand = require("./ClaimsCommand");
 const CpCommand = require("./CpCommand");
 const EditCommand = require("./EditCommand");
 const EditorCommand = require("./EditorCommand");
+const EmulatorCommand = require("./EmulatorCommand");
+const FindCommand = require("./FindCommand");
 const HelpCommand = require("./HelpCommand");
 const LoginCommand = require("./LoginCommand");
 const LsCommand = require("./LsCommand");
@@ -26,6 +28,8 @@ class CommandManager {
     CpCommand,
     EditCommand,
     EditorCommand,
+    EmulatorCommand,
+    // FindCommand,
     HelpCommand,
     LoginCommand,
     LsCommand,

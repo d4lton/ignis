@@ -36,7 +36,8 @@ class ProjectsCommand extends Command {
     }
     if (this._ignis.projects.length) {
       for (const project of this._ignis.projects) {
-        console.log(project);
+        const config = this._ignis.config.get(`firebase_config.${project}`);
+        console.log(`${project}${config.type === "emulator" ? " [emulator]" : ""}`);
       }
     } else {
       console.log("No projects found.");

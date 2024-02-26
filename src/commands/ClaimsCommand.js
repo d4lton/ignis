@@ -16,7 +16,8 @@ class ClaimsCommand extends Command {
       optional: [
         {arg: "<name> <value>", description: "Set claim value"},
         {arg: "--uid", description: "The ID is a UID"},
-        {arg: "--pretty", description: "Make the JSON pretty"}
+        {arg: "--pretty", description: "Make the JSON pretty"},
+        {arg: "--remove", description: "Remove the claim value"}
       ]
     }
   }
@@ -45,8 +46,15 @@ class ClaimsCommand extends Command {
   }
 
   async execute(args) {
-    if (args._.length !== 1 && args._.length !== 3) { return this.renderHelp(); }
+    if (args._.length < 1 || args._.length > 3) { return this.renderHelp(); }
     if (args._.length === 1) {
+      await this.showClaims(await this.getUser(args._[0], args.uid), args.pretty);
+    } else if (args._.length === 2) {
+      if (!args.remove) { return this.renderHelp(); }
+      const user = await this.getUser(args._[0], args.uid);
+      const claims = user.customClaims || {};
+      delete claims[args._[1]];
+      await this._ignis.firebase.app.auth().setCustomUserClaims(user.uid, claims);
       await this.showClaims(await this.getUser(args._[0], args.uid), args.pretty);
     } else if (args._.length === 3) {
       const user = await this.getUser(args._[0], args.uid);

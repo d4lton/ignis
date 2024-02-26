@@ -39,6 +39,11 @@ class Firestore {
     return node.list();
   }
 
+  async find(path, query, maxDepth = 1) {
+    const node = new FirestoreNode(path, this._firebase.app);
+    return node.find(query, maxDepth);
+  }
+
 }
 
 module.exports = Firestore;
