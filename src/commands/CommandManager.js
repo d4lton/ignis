@@ -11,6 +11,7 @@ const EditorCommand = require("./EditorCommand");
 const EmulatorCommand = require("./EmulatorCommand");
 const FindCommand = require("./FindCommand");
 const HelpCommand = require("./HelpCommand");
+const LinkCommand = require("./LinkCommand");
 const LoginCommand = require("./LoginCommand");
 const LsCommand = require("./LsCommand");
 const ProjectsCommand = require("./ProjectsCommand");
@@ -31,6 +32,7 @@ class CommandManager {
     EmulatorCommand,
     // FindCommand,
     HelpCommand,
+    // LinkCommand,
     LoginCommand,
     LsCommand,
     ProjectsCommand,

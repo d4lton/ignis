@@ -25,20 +25,26 @@ class FindCommand extends Command {
 
   async execute(args) {
     if (args._.length !== 3) { return this.renderHelp(); }
-    const ora = await import("ora");
-    const spinner = ora.default({discardStdin: false});
-    const pathInfo = this._ignis.getProjectPathInfo(args.collection || "/");
-    spinner.start();
-    const documents = await pathInfo.firebase.firestore.find(pathInfo.path, args._, args.depth || 1);
-    spinner.stop();
-    for (const document of documents) {
-      console.log(document.ref.path);
-      if (args.dump) {
-        let data = document.data();
-        data = args.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-        console.log(data);
-      }
+    console.log(args);
+    if (args.group) {
+      const pathInfo = this._ignis.getProjectPathInfo();
+      const snapshot = await pathInfo.firebase._app.firestore().collectionGroup(args._[0]).where("shop", args._[1], args._[2]).get();
+      console.log(snapshot.docs);
     }
+    // const ora = await import("ora");
+    // const spinner = ora.default({discardStdin: false});
+    // const pathInfo = this._ignis.getProjectPathInfo(args.collection || "/");
+    // spinner.start();
+    // const documents = await pathInfo.firebase.firestore.find(pathInfo.path, args._, args.depth || 1);
+    // spinner.stop();
+    // for (const document of documents) {
+    //   console.log(document.ref.path);
+    //   if (args.dump) {
+    //     let data = document.data();
+    //     data = args.pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+    //     console.log(data);
+    //   }
+    // }
   }
 
 }
