@@ -2,7 +2,7 @@
  * Copyright ©2022 Dana Basken
  */
 
-const {Utilities} = require("@d4lton/utilities");
+const {Utilities} = require("@d4lton/node-common");
 const Command = require("./Command");
 
 class ClaimsCommand extends Command {

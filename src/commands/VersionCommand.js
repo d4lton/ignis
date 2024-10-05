@@ -2,9 +2,8 @@
  * Copyright ©2022 Dana Basken
  */
 
-const fetch = require("node-fetch");
 const semver = require("semver");
-const {Package} = require("@d4lton/utilities");
+const {Package} = require("@d4lton/node-backend");
 const Command = require("./Command");
 
 class VersionCommand extends Command {

@@ -6,7 +6,7 @@ const path = require("node:path");
 const readline = require("node:readline");
 const {execSync}  = require("node:child_process");
 const chalk = require("chalk");
-const {Utilities} = require("@d4lton/utilities");
+const {Utilities} = require("@d4lton/node-common");
 const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
 const History = require("./History");
@@ -52,7 +52,7 @@ class Ignis {
       const config = this._config.get(`firebase_config.${this._project}`);
       emulator = config?.type === "emulator";
     }
-    input.setPrompt(`${chalk.red.dim("ignis")} ${projectName} ${emulator ? chalk.gray("[emulated]") : ""} > `);
+    input.setPrompt(`${chalk.red.dim("ignis")} ${projectName}${emulator ? chalk.gray(" [emulated]") : ""} > `);
     input.prompt();
   }
 

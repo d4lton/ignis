@@ -12,7 +12,7 @@ class ProjectsCommand extends Command {
       required: [],
       optional: [
         {arg: "--flush", description: "Remove all saved projects"},
-        {arg: "--remove <project-id>", description: "Remove a specific project"}
+        {arg: "--remove=<project-id>", description: "Remove a specific project"}
       ]
     }
   }

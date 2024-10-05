@@ -17,7 +17,7 @@ class LsCommand extends Command {
       required: [],
       optional: [
         {arg: "<path>", description: "The path to list the documents or collections of"},
-        {arg: "--out=<filename>", description: "Redirect the output to a file"}
+        {arg: "--output=<filename>", description: "Redirect the output to a file"}
       ]
     }
   }
@@ -32,8 +32,8 @@ class LsCommand extends Command {
         console.log("Nothing found.");
         return;
       }
-      if (args.out) { // TODO: use > like in cat
-        fs.writeFileSync(args.out, JSON.stringify(data));
+      if (args.output) {
+        fs.writeFileSync(args.output, JSON.stringify(data));
       } else {
         for (const path of data) {
           console.log(path);

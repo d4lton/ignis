@@ -4,7 +4,7 @@
 
 const path = require("node:path");
 const fs = require("node:fs");
-const {Utilities} = require("@d4lton/utilities");
+const {Utilities} = require("@d4lton/node-common");
 
 class History {
 

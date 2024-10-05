@@ -7,7 +7,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("crypto");
 const mkdirp = require("mkdirp");
-const {ObjectUtilities} = require("@d4lton/utilities");
+const {ObjectUtilities} = require("@d4lton/node-common");
 
 class UserConfig {
 

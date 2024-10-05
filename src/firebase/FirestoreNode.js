@@ -2,7 +2,7 @@
  * Copyright ©2022 Dana Basken
  */
 
-const {Utilities, ObjectUtilities} = require("@d4lton/utilities");
+const {Utilities, ObjectUtilities} = require("@d4lton/node-common");
 
 class FirestoreNode {
 

@@ -77,7 +77,9 @@ class CommandManager {
     const match = line.match(/^(\w+)\s*(.*)$/);
     if (!match) { return; }
     const arg = match[2] || "";
-    const args = minimist(arg.split(" "), {boolean: true});
+    const parts = (arg.match(/(?:[^\s"]+|"[^"]*")+/g) ?? [])
+      .map(part => part.match(/^"(.+?)"$/)?.[1] ?? part);
+    const args = minimist(parts, {boolean: true});
     args._ = args._.filter(it => it);
     return {
       command: match[1],
