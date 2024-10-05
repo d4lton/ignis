@@ -11,6 +11,7 @@ const UserConfig = require("./UserConfig");
 const Firebase = require("./firebase/Firebase");
 const History = require("./History");
 const CommandManager = require("./commands/CommandManager");
+const VersionCommand = require("./commands/VersionCommand");
 
 class Ignis {
 
@@ -19,10 +20,17 @@ class Ignis {
 
   constructor(argv) {
     this._argv = argv;
+    if (this._argv.version) { this._handleVersion(); }
     this.project = this._argv.project || this._config.get("project") || "default";
     this.editor = this._argv.editor || this._config.get("editor") || "";
     this._history = new History(this._config);
     this._commandManager = new CommandManager(this);
+  }
+
+  _handleVersion() {
+    const command = new VersionCommand(this);
+    command.execute({});
+    process.exit(0);
   }
 
   _ensureLoggedIn(project) {
