@@ -25,13 +25,11 @@
     "chalk": "4.1.2",
     "firebase-admin": "12.6.0",
     "minimist": "1.2.8",
+    "mkdirp": "1.0.4",
     "ora": "6.3.1",
     "semver": "7.6.3",
     "tmp": "0.2.3",
     "which": "3.0.1"
-  },
-  "devDependencies": {
-    "mkdirp": "1.0.4"
   },
   "bin": {
     "ignis": "ignis"
