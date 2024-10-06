@@ -29,14 +29,11 @@ Once running, try `help`.
     default* > cat config/main
     <JSON blob representing the contents of this document sent to stdout>
 
-    default* > cat config/main > some_file.json --pretty
+    default* > cat config/main --output=some_file.json --pretty
     (dumps contents of "config/main" to a local file named "some_file.json")
 
     default* > $vi some_file.json
     (opens vi to allow editing of some_file.json, note that "$" will execute any shell command)
-
-    default* > cat some_file.json > config/main
-    (dumps contents of local file named "some_file.json" to "config/main")
 
     default* > cp config/main config/backup
     (copies contents of "config/main" to "config/backup")
@@ -65,7 +62,7 @@ This will copy the `config/main` document in your `production` project to `confi
 
 ## CONFIGURATION SECURITY
 
-The configuration file is stored in ".config/com.basken.ignis/config.json" in your home directory, and is plaintext by default. If you want this file to be encrypted:
+The configuration file is stored in ".config/com.basken.ignis/config.json" in your home directory, and is plain text by default. If you want this file to be encrypted:
 
 - exit from ignis
 - delete `.config/com.basken.ignis/config.json`
