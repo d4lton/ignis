@@ -1,7 +1,7 @@
 {
   "name": "@d4lton/ignis",
   "version": "2.0.5",
-  "description": "Basic Firestore shell",
+  "description": "Basic Firebase/Firestore shell",
   "main": "ignis",
   "scripts": {
     "postversion": "git add package.json && git commit -m \"$npm_package_name $npm_package_version\" && git push && git tag -a $npm_package_version -m $npm_package_version && git push --tags",
