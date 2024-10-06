@@ -12,6 +12,7 @@ const Firebase = require("./firebase/Firebase");
 const History = require("./History");
 const CommandManager = require("./commands/CommandManager");
 const VersionCommand = require("./commands/VersionCommand");
+const Version = require("./Version");
 
 class Ignis {
 
@@ -81,6 +82,7 @@ class Ignis {
   }
 
   async start() {
+    await Version.autoCheck(this);
     this.login(this._project);
     const input = readline.createInterface({
       input: process.stdin,
