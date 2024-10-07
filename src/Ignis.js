@@ -156,21 +156,12 @@ class Ignis {
     }
     this._ensureLoggedIn(project);
     if (reference) {
-      if (path === "." || !path) {
-        path = reference.path;
-      }
+      if (path === "." || !path) { path = reference.path; }
     }
     const firebase = this._firebases[project];
-    if (!firebase) {
-      throw new Error(`No login found for project "${project}"`);
-    }
-    return {
-      project: project,
-      projectSpecified: projectSpecified,
-      path: path,
-      firebase: firebase,
-      components: this._getPathComponentsFromFilename(path)
-    };
+    if (!firebase) { throw new Error(`No login found for project "${project}"`); }
+    const isCollection = path.split("/").length % 2 === 1;
+    return {project, projectSpecified, path, firebase, isCollection, components: this._getPathComponentsFromFilename(path)};
   }
 
   _getPathComponentsFromFilename(filename) {
