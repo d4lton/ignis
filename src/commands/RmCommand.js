@@ -26,6 +26,7 @@ class RmCommand extends Command {
   async execute(args) {
     if (args._.length === 1) {
       const projectPathInfo = this._ignis.getProjectPathInfo(args._[0]);
+      if (projectPathInfo.isCollection) { return console.log("Cannot delete a collection"); }
       projectPathInfo.firebase.firestore.delete(projectPathInfo.path);
     } else {
       this.renderHelp();
