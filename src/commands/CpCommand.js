@@ -19,6 +19,7 @@ class CpCommand extends Command {
         {arg: "<dst-path>", description: "Destination path"}
       ],
       optional: [
+        {arg: "--dry-run", description: "Don't actually copy, just show what would happen"},
         {arg: "--recursive", description: "Copy the document and all sub-collections"}
       ]
     }
@@ -30,6 +31,7 @@ class CpCommand extends Command {
     if (args._.length === 2) {
       const sourceInfo = this._ignis.getProjectPathInfo(args._[0]);
       const destinationInfo = this._ignis.getProjectPathInfo(args._[1], sourceInfo);
+      console.log(`COPYING "${sourceInfo.displayPath}" TO "${destinationInfo.displayPath}"...`);
       let sourceRef;
       let destinationRef;
       if (sourceInfo.isCollection) {
@@ -39,13 +41,13 @@ class CpCommand extends Command {
         sourceRef = sourceInfo.firebase.app.firestore().doc(sourceInfo.path);
         destinationRef = destinationInfo.firebase.app.firestore().doc(destinationInfo.path);
       }
-      await this._copy(sourceRef, destinationRef, !!args.recursive);
+      await this._copy(sourceRef, destinationRef, !!args.recursive, !!args["dry-run"]);
     } else {
       this.renderHelp();
     }
   }
 
-  async _copy(source, destination, recursive = false) {
+  async _copy(source, destination, recursive = false, dryRun = false) {
     if (source instanceof admin.firestore.CollectionReference) {
       if (recursive) {
         const snapshot = await source.get();
@@ -55,10 +57,10 @@ class CpCommand extends Command {
         }
       }
     } else if (source instanceof admin.firestore.DocumentReference) {
-      console.log(`COPY ${source.path}...`);
+      console.log(`COPY "${source.path}" "${destination.path}"...${dryRun && " (dry run)"}`);
       const snapshot = await source.get();
       const data = await snapshot.data();
-      await destination.set(data, {merge: false});
+      if (!dryRun) { await destination.set(data, {merge: false}); }
       if (recursive) {
         const children = await source.listCollections();
         for (const child of children) {
